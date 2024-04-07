@@ -6,6 +6,7 @@ namespace Spark
         private readonly ServiceResolver _resolver;
         private readonly ServiceBinder _binder;
         private readonly ServiceFactory _factory;
+        private readonly CircularDependencyGuard _guard;
 
         public DependencyInjector()
         {
@@ -13,8 +14,10 @@ namespace Spark
             _resolver = new ServiceResolver();
             _factory = new ServiceFactory();
             _binder = new ServiceBinder();
+            _guard = new CircularDependencyGuard();
 
             _resolver.ServiceCollection = _collection;
+            _resolver.Guard = _guard;
             _binder.ServiceCollection = _collection;
             _binder.ServiceFactory = _factory;
             _factory.Resolver = _resolver;

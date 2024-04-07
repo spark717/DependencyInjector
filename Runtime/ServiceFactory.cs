@@ -10,11 +10,9 @@ namespace Spark
         
         public TServ CreateServiceWithReflection<TServ>()
         {
-            var constructor = typeof(TServ).GetConstructors(BindingFlags.Public).FirstOrDefault();
+            var constructor = typeof(TServ).GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
             if (constructor != null)
             {
-                // TODO add infinity recursion guard
-            
                 var argsTypes = constructor.GetParameters().Select(x => x.ParameterType);
                 var args = argsTypes.Select(Resolver.Resolve).ToArray();
                 var instance = constructor.Invoke(args);

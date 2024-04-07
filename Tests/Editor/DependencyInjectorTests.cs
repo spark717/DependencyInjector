@@ -187,4 +187,46 @@ public class DependencyInjectorTests
         Assert.True(serv == service1);
         Assert.True(serv == service2);
     }
+    
+    [Test]
+    public void ResolveConstructor()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<ChainServices.ServiceA>();
+            binder.Bind<ChainServices.ServiceB>();
+            binder.Bind<ChainServices.ServiceC>();
+            binder.Bind<ChainServices.ServiceD>();
+        });
+        di.Install(installer);
+
+        var a = di.Resolve<ChainServices.ServiceA>();
+
+        Assert.True(a != null);
+        Assert.True(a.B != null);
+        Assert.True(a.B.C != null);
+        Assert.True(a.B.D != null);
+        Assert.True(a.B.D.C != null);
+        Assert.True(a.B.D.C == a.B.C);
+    }
+    
+    [Test]
+    public void ExceptionOnCircularDependency()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<CircularServices.ServiceA>();
+            binder.Bind<CircularServices.ServiceB>();
+            binder.Bind<CircularServices.ServiceC>();
+            binder.Bind<CircularServices.ServiceD>();
+        });
+        di.Install(installer);
+
+        Assert.Catch(() =>
+        {
+            var a = di.Resolve<CircularServices.ServiceA>();
+        });
+    }
 }
