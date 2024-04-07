@@ -1,0 +1,18 @@
+{
+    "name": "Spark.DependencyInjector.Editor.Tests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9047e99146e88ea4ba2aac6e93a49496"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
