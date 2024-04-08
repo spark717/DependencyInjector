@@ -1,6 +1,8 @@
+using System;
 using NUnit.Framework;
 using Spark;
 using Tests.Editor.Fakes;
+using UnityEngine;
 
 public class DependencyInjectorTests
 {
@@ -66,7 +68,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>(isTransient: true);
+            binder.Bind<Service>(isSingletone: false);
         });
         di.Install(installer);
 
@@ -84,7 +86,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>(() => new Service(), isTransient: true);
+            binder.Bind<Service>(() => new Service(), isSingletone: false);
         });
         di.Install(installer);
 
@@ -138,7 +140,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(isTransient: true);
+            binder.Bind<IService, Service>(isSingletone: false);
         });
         di.Install(installer);
 
@@ -156,7 +158,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(() => new Service(), isTransient: true);
+            binder.Bind<IService, Service>(() => new Service(), isSingletone: false);
         });
         di.Install(installer);
 
@@ -227,6 +229,93 @@ public class DependencyInjectorTests
         Assert.Catch(() =>
         {
             var a = di.Resolve<CircularServices.ServiceA>();
+        });
+    }
+    
+    [Test]
+    public void ExceptionOnMissingBinding()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<ChainServices.ServiceA>();
+            binder.Bind<ChainServices.ServiceB>();
+            binder.Bind<ChainServices.ServiceC>();
+        });
+        di.Install(installer);
+
+        Assert.Catch(() =>
+        {
+            var service2 = di.Resolve<ChainServices.ServiceA>();
+        });
+    }
+    
+    [Test]
+    public void ExceptionOnDisabledScope()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        var scope = new Scope()
+        {
+            IsEnabled = true,
+        };
+        di.Install(installer, scope);
+
+        var service = di.Resolve<Service>();
+        scope.IsEnabled = false;
+        
+        Assert.True(service != null);
+        Assert.Catch(() =>
+        {
+            di.Resolve<Service>();
+        });
+    }
+    
+    [Test]
+    public void DestroySingletone()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        var scope = new Scope()
+        {
+            IsEnabled = true,
+        };
+        di.Install(installer, scope);
+
+        var service1 = di.Resolve<Service>();
+        scope.IsEnabled = false;
+        di.DestroySingletones();
+        scope.IsEnabled = true;
+        var service2 = di.Resolve<Service>();
+        di.DestroySingletones();
+        var service3 = di.Resolve<Service>();
+        
+        Assert.True(service1 != null);
+        Assert.True(service2 != null);
+        Assert.True(service3 != null);
+        Assert.True(service1 != service2);
+        Assert.True(service2 == service3);
+    }
+    
+    [Test]
+    public void ExceptionOnAbstractService()
+    {
+        var di = new DependencyInjector();
+
+        Assert.Catch(() =>
+        {
+            var installer = new Installer(binder =>
+            {
+                binder.Bind<IService>();
+            });
+            di.Install(installer);
+            di.Resolve<IService>();
         });
     }
 }

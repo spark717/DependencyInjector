@@ -17,17 +17,17 @@ namespace Spark
         {
             var binding = ServiceCollection.GetBinding(baseType);
             if (binding == null)
-                throw new Exception($"Missing binding for type <{baseType.Name}>");
+                throw new Exception($"Missing binding for type <{baseType.Name}>{Guard.GetHistoryString()}");
             
             var servType = binding.ServiceTypeList.First();
 
             var model = ServiceCollection.GetModel(servType);
             if (model == null)
-                throw new Exception($"Missing model <{baseType.Name}>->{servType.Name}");
+                throw new Exception($"Missing model for binding <{baseType.Name}>->{servType.Name}{Guard.GetHistoryString()}");
 
-            if (model.IsRegistered == false)
-                throw new Exception($"Model not registered <{baseType.Name}>->{servType.Name}");
-
+            if (model.Scope.IsEnabled == false)
+                throw new Exception($"Scope <{model.Scope.GetType().Name}> is disabled for binding <{baseType.Name}>->{servType.Name}{Guard.GetHistoryString()}");
+            
             Guard.Append(servType);
             var instance = model.GetInstance();
             Guard.RemoveTop();

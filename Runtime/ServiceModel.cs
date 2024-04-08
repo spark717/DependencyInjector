@@ -6,17 +6,24 @@ namespace Spark
     {
         public TServ Instance;
         public Func<TServ> CreateInstance;
-        public bool IsTransient;
         
         public override object GetInstance()
         {
-            if (IsTransient)
+            if (IsSingletone == false)
                 return CreateInstance();
             
             if (Instance == null)
                 Instance = CreateInstance();
 
             return Instance;
+        }
+
+        public override void DestroyInstance()
+        {
+            if (Instance is IDisposable dis)
+                dis.Dispose();
+            
+            Instance = default;
         }
     }
 }

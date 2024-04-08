@@ -13,7 +13,7 @@ namespace Spark
         public void Append(Type type)
         {
             if (_blacklist.Contains(type))
-                throw new Exception($"Circular dependency detected for type <{type.Name}>\nHistory:\n{GetHistoryString()}");
+                throw new Exception($"Circular dependency detected for type <{type.Name}>{GetHistoryString()}");
 
             _blacklist.Add(type);
             _history.Push(type);
@@ -29,6 +29,9 @@ namespace Spark
         {
             var sb = new StringBuilder();
 
+            sb.AppendLine();
+            sb.AppendLine("History:");
+            
             foreach (var type in _history.Reverse())
             {
                 sb.AppendLine(type.Name);

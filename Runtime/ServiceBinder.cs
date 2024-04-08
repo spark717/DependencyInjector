@@ -6,17 +6,18 @@ namespace Spark
     {
         public ServiceCollection ServiceCollection;
         public ServiceFactory ServiceFactory;
+        public IServiceScope Scope;
         
-        public void Bind<TServ>(bool isTransient)
+        public void Bind<TServ>(bool isSingletone)
         {
             AddBinding<TServ, TServ>();
-            RegisterService<TServ>(isTransient);
+            RegisterService<TServ>(isSingletone);
         }
 
-        public void Bind<TServ>(Func<TServ> factory, bool isTransient)
+        public void Bind<TServ>(Func<TServ> factory, bool isSingletone)
         {
             AddBinding<TServ, TServ>();
-            RegisterService(factory, isTransient);
+            RegisterService(factory, isSingletone);
         }
 
         public void Bind<TServ>(TServ instance)
@@ -25,16 +26,16 @@ namespace Spark
             RegisterService(instance);
         }
 
-        public void Bind<TBase, TServ>(bool isTransient) where TServ : TBase
+        public void Bind<TBase, TServ>(bool isSingletone) where TServ : TBase
         {
             AddBinding<TBase, TServ>();
-            RegisterService<TServ>(isTransient);
+            RegisterService<TServ>(isSingletone);
         }
 
-        public void Bind<TBase, TServ>(Func<TServ> factory, bool isTransient) where TServ : TBase
+        public void Bind<TBase, TServ>(Func<TServ> factory, bool isSingletone) where TServ : TBase
         {
             AddBinding<TBase, TServ>();
-            RegisterService(factory, isTransient);
+            RegisterService(factory, isSingletone);
         }
 
         public void Bind<TBase, TServ>(TServ instance) where TServ : TBase
@@ -43,24 +44,28 @@ namespace Spark
             RegisterService(instance);
         }
 
-        private void RegisterService<TServ>(bool isTransient = false)
+        private void RegisterService<TServ>(bool isSingletone)
         {
-            RegisterService(ServiceFactory.CreateServiceWithReflection<TServ>, isTransient);
+            if (typeof(TServ).IsAbstract)
+                throw new Exception($"Cant bind abstract type <{typeof(TServ).Name}> to self");
+            
+            RegisterService(ServiceFactory.CreateServiceWithReflection<TServ>, isSingletone);
         }
         
-        private void RegisterService<TServ>(Func<TServ> factory, bool isTransient = false)
+        private void RegisterService<TServ>(Func<TServ> factory, bool isSingletone)
         {
             var model = GetOrCreateModel<TServ>();
             model.CreateInstance = factory;
-            model.IsTransient = isTransient;
-            model.IsRegistered = true;
+            model.IsSingletone = isSingletone;
+            model.Scope = Scope;
         }
         
         private void RegisterService<TServ>(TServ instance)
         {
             var model = GetOrCreateModel<TServ>();
             model.Instance = instance;
-            model.IsRegistered = true;
+            model.IsSingletone = true;
+            model.Scope = Scope;
         }
 
         private void AddBinding<TBase, TServ>()

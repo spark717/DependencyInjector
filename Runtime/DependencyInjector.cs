@@ -1,34 +1,44 @@
 namespace Spark
 {
-    public class DependencyInjector
+    public class DependencyInjector : IDependencyInjector
     {
         private readonly ServiceCollection _collection;
         private readonly ServiceResolver _resolver;
-        private readonly ServiceBinder _binder;
         private readonly ServiceFactory _factory;
         private readonly CircularDependencyGuard _guard;
+        private readonly SingletoneHandler _singletoneHandler;
+        private readonly ServiceInjector _injector;
+        private readonly ApplicationScope _defaultScope;
 
         public DependencyInjector()
         {
             _collection = new ServiceCollection();
             _resolver = new ServiceResolver();
             _factory = new ServiceFactory();
-            _binder = new ServiceBinder();
             _guard = new CircularDependencyGuard();
+            _singletoneHandler = new SingletoneHandler();
+            _injector = new ServiceInjector();
+            _defaultScope = new ApplicationScope();
 
             _resolver.ServiceCollection = _collection;
             _resolver.Guard = _guard;
-            _binder.ServiceCollection = _collection;
-            _binder.ServiceFactory = _factory;
             _factory.Resolver = _resolver;
+            _singletoneHandler.Collection = _collection;
         }
         
-        public void Install(params IServiceInstaller[] installers)
+        public void Install(IServiceInstaller installer, IServiceScope scope = null)
         {
-            foreach (var installer in installers)
+            if (scope == null)
+                scope = _defaultScope;
+            
+            var binder = new ServiceBinder
             {
-                installer.Install(_binder);
-            }
+                Scope = scope,
+                ServiceCollection = _collection,
+                ServiceFactory = _factory
+            };
+
+            installer.Install(binder);
         }
 
         public TServ Resolve<TServ>()
@@ -36,14 +46,19 @@ namespace Spark
             return _resolver.Resolve<TServ>();
         }
 
-        public void CreateAllInstances()
+        public void Inject(object target)
         {
-            
+            _injector.Inject(target);
+        }
+
+        public void CreateSingletones()
+        {
+            _singletoneHandler.CreateSingletones();
         }
         
-        public void DestroyAllInstances()
+        public void DestroySingletones()
         {
-            
+            _singletoneHandler.DestroySingletones();
         }
     }
 }

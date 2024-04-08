@@ -48,5 +48,10 @@ namespace Spark
             
             return default;
         }
+
+        public IEnumerable<ServiceModelBase> GetModels()
+        {
+            return _modelsByServiceType.Values;
+        }
     }
 }

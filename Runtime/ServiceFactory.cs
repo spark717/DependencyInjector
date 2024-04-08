@@ -20,6 +20,9 @@ namespace Spark
             }
             else
             {
+                if (typeof(TServ).IsAbstract)
+                    throw new Exception($"Cant create instance of abstract type <{typeof(TServ).Name}>");
+                
                 var instance = Activator.CreateInstance<TServ>();
                 return instance;
             }
