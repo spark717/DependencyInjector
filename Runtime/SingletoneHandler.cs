@@ -3,6 +3,7 @@ namespace Spark
     internal class SingletoneHandler
     {
         public ServiceCollection Collection;
+        public InstanceHandler InstanceHandler;
         
         public void CreateSingletones()
         {
@@ -10,7 +11,7 @@ namespace Spark
             {
                 if (model.IsSingletone && model.Scope.IsEnabled)
                 {
-                    model.GetInstance();
+                    InstanceHandler.GetInstance(model);
                 }
             }
         }
@@ -21,7 +22,7 @@ namespace Spark
             {
                 if (model.IsSingletone && model.Scope.IsEnabled == false)
                 {
-                    model.DestroyInstance();
+                    InstanceHandler.DestroyInstance(model);
                 }
             }
         }

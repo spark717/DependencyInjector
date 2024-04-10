@@ -9,6 +9,8 @@ namespace Spark
         private readonly SingletoneHandler _singletoneHandler;
         private readonly ServiceInjector _injector;
         private readonly ApplicationScope _defaultScope;
+        private readonly ProcessorsCollection _processorsCollection;
+        private readonly InstanceHandler _instanceHandler;
 
         public DependencyInjector()
         {
@@ -19,11 +21,16 @@ namespace Spark
             _singletoneHandler = new SingletoneHandler();
             _injector = new ServiceInjector();
             _defaultScope = new ApplicationScope();
+            _processorsCollection = new ProcessorsCollection();
+            _instanceHandler = new InstanceHandler();
 
             _resolver.ServiceCollection = _collection;
             _resolver.Guard = _guard;
+            _resolver.InstanceHandler = _instanceHandler;
             _factory.Resolver = _resolver;
             _singletoneHandler.Collection = _collection;
+            _singletoneHandler.InstanceHandler = _instanceHandler;
+            _instanceHandler.ProcessorsCollection = _processorsCollection;
             
             Install(new MainInstaller(this));
         }
@@ -43,6 +50,11 @@ namespace Spark
             installer.Install(binder);
         }
 
+        public void AddProcessor(IServiceProcessor processor)
+        {
+            _processorsCollection.Add(processor);
+        }
+        
         public TBase Resolve<TBase>()
         {
             return _resolver.Resolve<TBase>();

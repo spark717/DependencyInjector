@@ -8,6 +8,7 @@ namespace Spark
     {
         public ServiceCollection ServiceCollection;
         public CircularDependencyGuard Guard;
+        public InstanceHandler InstanceHandler;
 
         public TBase Resolve<TBase>()
         {
@@ -64,11 +65,11 @@ namespace Spark
                 throw new Exception($"Scope <{model.Scope.GetType().Name}> is disabled for binding <{baseType.Name}>->{servType.Name}{Guard.GetHistoryString()}");
             
             Guard.Append(servType);
-            var instance = model.GetInstance();
+            var instance = InstanceHandler.GetInstance(model);
             Guard.RemoveTop();
             return instance;
         }
-
+        
         private bool IsTypeSuitableForArrayResolve(Type servType)
         {
             return ServiceCollection.GetModel(servType).Scope.IsEnabled;

@@ -394,4 +394,25 @@ public class DependencyInjectorTests
         Assert.True(arr3[0].GetType() != arr3[1].GetType());
         Assert.True(arr3[0] != arr3[1]);
     }
+    
+    [Test]
+    public void Processor()
+    {
+        var di = new DependencyInjector();
+        var scope = new Scope() { IsEnabled = false};
+        var processor = new Processor();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        di.Install(installer, scope);
+        di.AddProcessor(processor);
+        scope.IsEnabled = true;
+        di.CreateSingletones();
+        scope.IsEnabled = false;
+        di.DestroySingletones();
+        
+        Assert.True(processor.CreateProcessedCount == 1);
+        Assert.True(processor.DestroyProcessedCount == 1);
+    }
 }

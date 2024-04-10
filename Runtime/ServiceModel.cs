@@ -9,20 +9,21 @@ namespace Spark
         
         public override object GetInstance()
         {
-            if (IsSingletone == false)
-                return CreateInstance();
-            
-            if (Instance == null)
-                Instance = CreateInstance();
-
             return Instance;
+        }
+
+        public override object CreateNewInstance()
+        {
+            var instance = CreateInstance();
+
+            if (IsSingletone)
+                Instance = instance;
+
+            return instance;
         }
 
         public override void DestroyInstance()
         {
-            if (Instance is IDisposable dis)
-                dis.Dispose();
-            
             Instance = default;
         }
     }

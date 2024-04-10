@@ -53,5 +53,10 @@ namespace Spark
         {
             return _modelsByServiceType.Values;
         }
+        
+        public IEnumerable<ServiceBindingModel> GetBindings()
+        {
+            return _bindingsByBaseType.Values;
+        }
     }
 }

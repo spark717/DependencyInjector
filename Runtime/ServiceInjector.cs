@@ -2,7 +2,7 @@ using System;
 
 namespace Spark
 {
-    public class ServiceInjector
+    internal class ServiceInjector
     {
         public void Inject(object target)
         {
