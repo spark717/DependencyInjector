@@ -2,6 +2,8 @@ namespace Spark
 {
     public interface IDependencyInjector
     {
-        TServ Resolve<TServ>();
+        public TBase Resolve<TBase>();
+        public TBase[] ResolveMany<TBase>();
+        public void Inject(object target);
     }
 }

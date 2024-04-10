@@ -24,6 +24,8 @@ namespace Spark
             _resolver.Guard = _guard;
             _factory.Resolver = _resolver;
             _singletoneHandler.Collection = _collection;
+            
+            Install(new MainInstaller(this));
         }
         
         public void Install(IServiceInstaller installer, IServiceScope scope = null)
@@ -41,9 +43,14 @@ namespace Spark
             installer.Install(binder);
         }
 
-        public TServ Resolve<TServ>()
+        public TBase Resolve<TBase>()
         {
-            return _resolver.Resolve<TServ>();
+            return _resolver.Resolve<TBase>();
+        }
+        
+        public TBase[] ResolveMany<TBase>()
+        {
+            return _resolver.ResolveMany<TBase>();
         }
 
         public void Inject(object target)

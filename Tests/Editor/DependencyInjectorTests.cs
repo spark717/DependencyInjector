@@ -1,8 +1,6 @@
-using System;
 using NUnit.Framework;
 using Spark;
 using Tests.Editor.Fakes;
-using UnityEngine;
 
 public class DependencyInjectorTests
 {
@@ -317,5 +315,83 @@ public class DependencyInjectorTests
             di.Install(installer);
             di.Resolve<IService>();
         });
+    }
+    
+    [Test]
+    public void ResolveInjector()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        di.Install(installer);
+        var di2 = di.Resolve<IDependencyInjector>();
+        var service1 = di.Resolve<Service>();
+        var service2 = di2.Resolve<Service>();
+
+        Assert.True(service1 != null);
+        Assert.True(service2 != null);
+        Assert.True(service1 == service2);
+    }
+    
+    [Test]
+    public void ResolveArray()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<ArrayServices.ServiceA>();
+            binder.Bind<IService, ArrayServices.ServiceB>();
+            binder.Bind<IService, ArrayServices.ServiceC>();
+        });
+        di.Install(installer);
+
+        var a = di.Resolve<ArrayServices.ServiceA>();
+
+        Assert.True(a != null);
+        Assert.True(a.Services.Length == 2);
+        Assert.True(a.Services[0] != null);
+        Assert.True(a.Services[1] != null);
+        Assert.True(a.Services[0].GetType() != a.Services[1].GetType());
+        Assert.True(a.Services[0] != a.Services[1]);
+    }
+    
+    [Test]
+    public void ResolveArrayInScopes()
+    {
+        var di = new DependencyInjector();
+        var scope1 = new Scope() { IsEnabled = false };
+        var scope2 = new Scope() { IsEnabled = false };
+        var installer1 = new Installer(binder =>
+        {
+            binder.Bind<IService, ArrayServices.ServiceB>();
+        });
+        var installer2 = new Installer(binder =>
+        {
+            binder.Bind<IService, ArrayServices.ServiceC>();
+        });
+        di.Install(installer1, scope1);
+        di.Install(installer2, scope2);
+
+        var arr0 = di.ResolveMany<IService>();
+        scope1.IsEnabled = true;
+        scope2.IsEnabled = false;
+        var arr1 = di.ResolveMany<IService>();
+        scope1.IsEnabled = false;
+        scope2.IsEnabled = true;
+        var arr2 = di.ResolveMany<IService>();
+        scope1.IsEnabled = true;
+        scope2.IsEnabled = true;
+        var arr3 = di.ResolveMany<IService>();
+        
+        Assert.True(arr0.Length == 0);
+        Assert.True(arr1.Length == 1);
+        Assert.True(arr2.Length == 1);
+        Assert.True(arr3.Length == 2);
+        Assert.True(arr1[0] is ArrayServices.ServiceB);
+        Assert.True(arr2[0] is ArrayServices.ServiceC);
+        Assert.True(arr3[0].GetType() != arr3[1].GetType());
+        Assert.True(arr3[0] != arr3[1]);
     }
 }
