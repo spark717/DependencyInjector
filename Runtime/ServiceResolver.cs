@@ -35,6 +35,11 @@ namespace Spark
                 return ResolveSingle(baseType, binding.ServiceTypeList.First());
         }
 
+        public object[] Resolve(IEnumerable<Type> types)
+        {
+            return types.Select(Resolve).ToArray();
+        }
+
         private object ResolveArray(Type baseType, List<Type> servTypes) 
         {
             var length = servTypes.Count(IsTypeSuitableForArrayResolve);

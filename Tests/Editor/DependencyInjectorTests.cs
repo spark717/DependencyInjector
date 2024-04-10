@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Spark;
 using Tests.Editor.Fakes;
+using IService = Tests.Editor.Fakes.IService;
 
 public class DependencyInjectorTests
 {
@@ -396,7 +397,7 @@ public class DependencyInjectorTests
     }
     
     [Test]
-    public void Processor()
+    public void CreateAndDestroyProcess()
     {
         var di = new DependencyInjector();
         var scope = new Scope() { IsEnabled = false};
@@ -414,5 +415,48 @@ public class DependencyInjectorTests
         
         Assert.True(processor.CreateProcessedCount == 1);
         Assert.True(processor.DestroyProcessedCount == 1);
+    }
+    
+    [Test]
+    public void InjectInMethod()
+    {
+        var di = new DependencyInjector();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<InjectableServices.ServiceB>();
+            binder.Bind<InjectableServices.ServiceC>();
+            binder.Bind<InjectableServices.ServiceD>();
+        });
+        di.Install(installer);
+
+        var a = new InjectableServices.ServiceA();
+        di.Inject(a);
+        
+        Assert.True(a.B != null);
+        Assert.True(a.B.C != null);
+        Assert.True(a.B.D != null);
+        Assert.True(a.B.C.D != null);
+        Assert.True(a.B.C.D == a.B.D);
+    }
+    
+    [Test]
+    public void CreateAndDestroyMessageHandle()
+    {
+        var di = new DependencyInjector();
+        var scope = new Scope() { IsEnabled = false };
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        di.Install(installer, scope);
+
+        scope.IsEnabled = true;
+        var service = di.Resolve<Service>();
+        scope.IsEnabled = false;
+        di.DestroySingletones();
+        
+        Assert.IsTrue(service.IsCreated);
+        Assert.IsTrue(service.IsDestroyed);
+        Assert.IsTrue(service.IsDisposed);
     }
 }

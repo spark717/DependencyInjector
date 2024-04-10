@@ -31,6 +31,8 @@ namespace Spark
             _singletoneHandler.Collection = _collection;
             _singletoneHandler.InstanceHandler = _instanceHandler;
             _instanceHandler.ProcessorsCollection = _processorsCollection;
+            _instanceHandler.Injector = _injector;
+            _injector.Resolver = _resolver;
             
             Install(new MainInstaller(this));
         }
@@ -65,7 +67,7 @@ namespace Spark
             return _resolver.ResolveMany<TBase>();
         }
 
-        public void Inject(object target)
+        public void Inject(IServiceInjectable target)
         {
             _injector.Inject(target);
         }

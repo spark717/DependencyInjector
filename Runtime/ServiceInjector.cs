@@ -1,12 +1,27 @@
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace Spark
 {
     internal class ServiceInjector
     {
-        public void Inject(object target)
+        public ServiceResolver Resolver;
+        
+        public void Inject(IServiceInjectable target)
         {
-            throw new NotImplementedException();
+            var method = GetMethod(target);
+            if (method == null)
+                throw new Exception($"Inject method is missing in {target.GetType().Name}");
+
+            var argsTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
+            var args = Resolver.Resolve(argsTypes);
+            method.Invoke(target, args);
+        }
+
+        private MethodInfo GetMethod(object target)
+        {
+            return target.GetType().GetMethod("Inject", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         }
     }
 }

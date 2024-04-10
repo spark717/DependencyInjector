@@ -4,6 +4,6 @@ namespace Spark
     {
         public TBase Resolve<TBase>();
         public TBase[] ResolveMany<TBase>();
-        public void Inject(object target);
+        public void Inject(IServiceInjectable target);
     }
 }

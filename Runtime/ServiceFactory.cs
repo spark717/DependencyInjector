@@ -14,7 +14,7 @@ namespace Spark
             if (constructor != null)
             {
                 var argsTypes = constructor.GetParameters().Select(x => x.ParameterType);
-                var args = argsTypes.Select(Resolver.Resolve).ToArray();
+                var args = Resolver.Resolve(argsTypes);
                 var instance = constructor.Invoke(args);
                 return (TServ)instance;
             }
