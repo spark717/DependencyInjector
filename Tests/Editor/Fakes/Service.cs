@@ -8,6 +8,8 @@ namespace Tests.Editor.Fakes
         public bool IsCreated;
         public bool IsDestroyed;
         public bool IsDisposed;
+
+        public object Obj { get; set; }
         
         public void OnCreate()
         {

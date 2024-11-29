@@ -7,6 +7,7 @@ namespace Spark
         public ServiceCollection ServiceCollection;
         public ServiceFactory ServiceFactory;
         public IServiceScope Scope;
+        public IDependencyInjector DependencyInjector;
         
         public void Bind<TServ>(bool isSingletone)
         {
@@ -15,6 +16,12 @@ namespace Spark
         }
 
         public void Bind<TServ>(Func<TServ> factory, bool isSingletone)
+        {
+            AddBinding<TServ, TServ>();
+            RegisterService(factory, isSingletone);
+        }
+
+        public void Bind<TServ>(Func<IDependencyInjector, TServ> factory, bool isSingletone = true)
         {
             AddBinding<TServ, TServ>();
             RegisterService(factory, isSingletone);
@@ -33,6 +40,12 @@ namespace Spark
         }
 
         public void Bind<TBase, TServ>(Func<TServ> factory, bool isSingletone) where TServ : TBase
+        {
+            AddBinding<TBase, TServ>();
+            RegisterService(factory, isSingletone);
+        }
+
+        public void Bind<TBase, TServ>(Func<IDependencyInjector, TServ> factory, bool isSingletone = true) where TServ : TBase
         {
             AddBinding<TBase, TServ>();
             RegisterService(factory, isSingletone);
@@ -58,6 +71,11 @@ namespace Spark
             model.CreateInstance = factory;
             model.IsSingletone = isSingletone;
             model.Scope = Scope;
+        }
+        
+        private void RegisterService<TServ>(Func<IDependencyInjector, TServ> factory, bool isSingletone)
+        {
+            RegisterService(() => factory(DependencyInjector), isSingletone);
         }
         
         private void RegisterService<TServ>(TServ instance)

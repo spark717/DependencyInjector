@@ -42,6 +42,31 @@ public class DependencyInjectorTests
     }
     
     [Test]
+    public void ResolveSelfSingleFactoryWithDependency()
+    {
+        var di = new DependencyInjector();
+        var obj = new object();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<object>(() => obj);
+            binder.Bind<Service>(x =>
+            {
+                var o = x.Resolve<object>();
+                return new Service(){ Obj = o };
+            });
+        });
+        di.Install(installer);
+
+        var service1 = di.Resolve<Service>();
+        var service2 = di.Resolve<Service>();
+
+        Assert.True(service1 != null);
+        Assert.True(service2 != null);
+        Assert.True(service1.Obj == obj);
+        Assert.True(service1 == service2);
+    }
+    
+    [Test]
     public void ResolveSelfInstance()
     {
         var di = new DependencyInjector();
@@ -130,6 +155,31 @@ public class DependencyInjectorTests
         
         Assert.True(service1 != null);
         Assert.True(service2 != null);
+        Assert.True(service1 == service2);
+    }
+    
+    [Test]
+    public void ResolveInterfaceSingleFactoryWithDependency()
+    {
+        var di = new DependencyInjector();
+        var obj = new object();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<object>(() => obj);
+            binder.Bind<IService, Service>(x =>
+            {
+                var o = x.Resolve<object>();
+                return new Service(){ Obj = o };
+            });
+        });
+        di.Install(installer);
+
+        var service1 = di.Resolve<IService>();
+        var service2 = di.Resolve<IService>();
+
+        Assert.True(service1 != null);
+        Assert.True(service2 != null);
+        Assert.True(service1.Obj == obj);
         Assert.True(service1 == service2);
     }
     

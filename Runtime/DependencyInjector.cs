@@ -46,7 +46,8 @@ namespace Spark
             {
                 Scope = scope,
                 ServiceCollection = _collection,
-                ServiceFactory = _factory
+                ServiceFactory = _factory,
+                DependencyInjector = this,
             };
 
             installer.Install(binder);

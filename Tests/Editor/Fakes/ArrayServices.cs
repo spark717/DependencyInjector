@@ -14,10 +14,12 @@ namespace Tests.Editor.Fakes
 
         public class ServiceB : IService
         {
+            public object Obj { get; set; }
         }
         
         public class ServiceC : IService
         {
+            public object Obj { get; set; }
         }
     }
 }
