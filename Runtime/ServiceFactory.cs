@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace Spark
 {
-    internal class ServiceFactory
+    internal class ReflectionFactory<TServ> : IFactory<TServ>
     {
         public ServiceResolver Resolver;
         
-        public TServ CreateServiceWithReflection<TServ>()
+        public TServ Create()
         {
             var constructor = typeof(TServ).GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
             if (constructor != null)
