@@ -57,9 +57,9 @@ namespace Spark
         {
             var isArray = type.IsArray;
             var baseType = isArray ? type.GetElementType() : type;
+            var serviceTypes = ServiceTypesByBaseType.GetOrCreate(baseType);
             if (isArray)
             {
-                var serviceTypes = ServiceTypesByBaseType.GetOrCreate(baseType);
                 var instances = serviceTypes
                     .Where(HasActiveController)
                     .Select(GetOrCreateInstance);
@@ -68,7 +68,7 @@ namespace Spark
             }
             else
             {
-                var serviceType = ServiceTypesByBaseType.GetOrCreate(baseType).FirstOrDefault();
+                var serviceType = serviceTypes.FirstOrDefault(HasActiveController);
                 if (serviceType == null)
                     throw new Exception();
                 

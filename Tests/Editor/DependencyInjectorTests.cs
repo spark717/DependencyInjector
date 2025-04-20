@@ -515,4 +515,43 @@ public class DependencyInjectorTests
         Assert.IsTrue(service.IsDestroyed);
         Assert.IsTrue(service.IsDisposed);
     }
+
+    [Test]
+    public void ResolveServicesInSeparateScopes()
+    {
+        var di = new DependencyInjector();
+        var scope1 = new Scope();
+        var scope2 = new Scope();
+        var obj1 = new object();
+        var obj2 = new object();
+        var installer1 = new Installer(binder =>
+        {
+            binder
+                .Bind<Service>()
+                .As<IService>()
+                .WithFactory(() => new Service(){Obj = obj1} );
+        });
+        var installer2 = new Installer(binder =>
+        {
+            binder
+                .Bind<Service2>()
+                .As<IService>()
+                .WithFactory(() => new Service2(){Obj = obj2} );
+        });
+        di.Install(installer1, scope1);
+        di.Install(installer2, scope2);
+
+        scope1.IsEnabled = true;
+        scope2.IsEnabled = false;
+        var serv1 = di.Resolve<IService>();
+
+        scope1.IsEnabled = false;
+        scope2.IsEnabled = true;
+        var serv2 = di.Resolve<IService>();
+        
+        Assert.True(serv1 is Service);
+        Assert.True(serv2 is Service2);
+        Assert.True(serv1.Obj == obj1);
+        Assert.True(serv2.Obj == obj2);
+    }
 }
