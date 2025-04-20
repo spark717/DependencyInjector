@@ -20,9 +20,15 @@ namespace Spark
 
             var controller = list.FirstOrDefault(x => x.IsActive());
             if (controller == null)
-                throw new Exception();
+                throw new Exception($"Missing controller for service type {serviceType}");
             
             return controller;
+        }
+        
+        public bool HasActiveController(Type serviceType)
+        {
+            var list = ControllersByType.GetOrCreate(serviceType);
+            return list.Any(x => x.IsActive());
         }
 
         public IEnumerable<IServiceController> GetControllers()

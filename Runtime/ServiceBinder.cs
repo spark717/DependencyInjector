@@ -12,6 +12,8 @@ namespace Spark
         
         public IServiceBindingSetup<TServ> Bind<TServ>(bool isSingletone = true)
         {
+            Resolver.RegisterSelf<TServ>();
+            
             var controller = new ServiceScopeController<TServ>()
             {
                 IsSingletone = isSingletone,

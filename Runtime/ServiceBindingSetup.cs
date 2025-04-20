@@ -42,10 +42,10 @@ namespace Spark
 
         public IServiceBindingSetup<TServ> WithInstance(TServ instance)
         {
-            if (Controller.IsSingletone == false)
-                throw new Exception();
-            
-            Controller.Instance = instance;
+            Controller.Factory = new InstanceFactory<TServ>()
+            {
+                Instance = instance
+            };
             return this;
         }
     }

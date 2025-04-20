@@ -9,7 +9,20 @@ namespace Spark
         public readonly Dictionary<Type, HashSet<Type>> ServiceTypesByBaseType = new();
 
         public NewServiceCollection ServiceCollection;
+
+        public void RegisterSelf<TServ>()
+        {
+            var serviceType = typeof(TServ);
+            var list = ServiceTypesByBaseType.GetOrCreate(serviceType);
+            list.Add(serviceType);
+        }
         
+        public void UnregisterSelf<TServ>()
+        {
+            var serviceType = typeof(TServ);
+            var list = ServiceTypesByBaseType.GetOrCreate(serviceType);
+            list.Remove(serviceType);
+        }
 
         public void RegisterTypePair<TServ, TBase>()
         {
@@ -21,6 +34,8 @@ namespace Spark
             
             var list = ServiceTypesByBaseType.GetOrCreate(baseType);
             list.Add(serviceType);
+
+            UnregisterSelf<TServ>();
         }
         
         public TBase Resolve<TBase>()
@@ -45,7 +60,9 @@ namespace Spark
             if (isArray)
             {
                 var serviceTypes = ServiceTypesByBaseType.GetOrCreate(baseType);
-                var instances = serviceTypes.Select(GetOrCreateInstance);
+                var instances = serviceTypes
+                    .Where(HasActiveController)
+                    .Select(GetOrCreateInstance);
                 var array = CreateArray(baseType, instances);
                 return array;
             }
@@ -60,6 +77,11 @@ namespace Spark
             }
         }
 
+        private bool HasActiveController(Type serviceType)
+        {
+            return ServiceCollection.HasActiveController(serviceType);
+        }
+        
         private object GetOrCreateInstance(Type serviceType)
         {
             var controller = ServiceCollection.GetActiveController(serviceType);
