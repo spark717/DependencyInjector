@@ -29,7 +29,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>(() => new Service());
+            binder.Bind<Service>().WithFactory(() => new Service());
         });
         di.Install(installer);
 
@@ -48,8 +48,9 @@ public class DependencyInjectorTests
         var obj = new object();
         var installer = new Installer(binder =>
         {
-            binder.Bind<object>(() => obj);
-            binder.Bind<Service>(x =>
+            binder.Bind<object>().WithFactory(() => obj);
+            binder.Bind<Service>()
+                .WithFactory(x =>
             {
                 var o = x.Resolve<object>();
                 return new Service(){ Obj = o };
@@ -73,7 +74,7 @@ public class DependencyInjectorTests
         var serv = new Service();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>(serv);
+            binder.Bind<Service>().WithInstance(serv);
         });
         di.Install(installer);
 
@@ -110,7 +111,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>(() => new Service(), isSingletone: false);
+            binder.Bind<Service>(isSingletone: false).WithFactory(() => new Service());
         });
         di.Install(installer);
 
@@ -128,7 +129,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>();
+            binder.Bind<Service>().As<IService>();
         });
         di.Install(installer);
 
@@ -146,7 +147,10 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(() => new Service());
+            binder
+                .Bind<Service>()
+                .As<IService>()
+                .WithFactory(() => new Service());
         });
         di.Install(installer);
 
@@ -165,8 +169,10 @@ public class DependencyInjectorTests
         var obj = new object();
         var installer = new Installer(binder =>
         {
-            binder.Bind<object>(() => obj);
-            binder.Bind<IService, Service>(x =>
+            binder.Bind<object>().WithFactory(() => obj);
+            binder.Bind<Service>()
+                .As<IService>()
+                .WithFactory(x =>
             {
                 var o = x.Resolve<object>();
                 return new Service(){ Obj = o };
@@ -189,7 +195,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(isSingletone: false);
+            binder.Bind<Service>(isSingletone: false).As<IService>();
         });
         di.Install(installer);
 
@@ -207,7 +213,7 @@ public class DependencyInjectorTests
         var di = new DependencyInjector();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(() => new Service(), isSingletone: false);
+            binder.Bind<Service>(isSingletone: false).As<IService>().WithFactory(() => new Service());
         });
         di.Install(installer);
 
@@ -226,7 +232,7 @@ public class DependencyInjectorTests
         var serv = new Service();
         var installer = new Installer(binder =>
         {
-            binder.Bind<IService, Service>(serv);
+            binder.Bind<Service>().As<IService>().WithInstance(serv);
         });
         di.Install(installer);
 
@@ -393,8 +399,8 @@ public class DependencyInjectorTests
         var installer = new Installer(binder =>
         {
             binder.Bind<ArrayServices.ServiceA>();
-            binder.Bind<IService, ArrayServices.ServiceB>();
-            binder.Bind<IService, ArrayServices.ServiceC>();
+            binder.Bind<ArrayServices.ServiceB>().As<IService>();
+            binder.Bind<ArrayServices.ServiceC>().As<IService>();
         });
         di.Install(installer);
 
@@ -416,11 +422,11 @@ public class DependencyInjectorTests
         var scope2 = new Scope() { IsEnabled = false };
         var installer1 = new Installer(binder =>
         {
-            binder.Bind<IService, ArrayServices.ServiceB>();
+            binder.Bind<ArrayServices.ServiceB>().As<IService>();
         });
         var installer2 = new Installer(binder =>
         {
-            binder.Bind<IService, ArrayServices.ServiceC>();
+            binder.Bind<ArrayServices.ServiceC>().As<IService>();
         });
         di.Install(installer1, scope1);
         di.Install(installer2, scope2);
@@ -447,7 +453,7 @@ public class DependencyInjectorTests
     }
     
     [Test]
-    public void CreateAndDestroyProcess()
+    public void CreateAndDestroyProcessor()
     {
         var di = new DependencyInjector();
         var scope = new Scope() { IsEnabled = false};
@@ -455,9 +461,9 @@ public class DependencyInjectorTests
         var installer = new Installer(binder =>
         {
             binder.Bind<Service>();
+            binder.Bind<Processor>().AsProcessor().WithInstance(processor);
         });
         di.Install(installer, scope);
-        di.AddProcessor(processor);
         scope.IsEnabled = true;
         di.CreateSingletones();
         scope.IsEnabled = false;
