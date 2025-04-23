@@ -3,7 +3,7 @@ namespace Spark
     internal class ServiceBinder : IServiceBinder
     {
         public IServiceScope Scope;
-        public NewServiceCollection ServiceCollection;
+        public ServiceCollection ServiceCollection;
         public ServiceResolver Resolver;
         public DependencyInjector DependencyInjector;
         public ServiceInjector Injector;
@@ -14,7 +14,7 @@ namespace Spark
         {
             Resolver.RegisterSelf<TServ>();
             
-            var controller = new ServiceScopeController<TServ>()
+            var controller = new ServiceController<TServ>()
             {
                 IsSingletone = isSingletone,
                 Scope = Scope,

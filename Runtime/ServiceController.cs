@@ -2,7 +2,7 @@ using System;
 
 namespace Spark
 {
-    internal class ServiceScopeController<TServ> : IServiceController
+    internal class ServiceController<TServ> : IServiceController
     {
         public bool IsSingletone;
         public bool IsProcessor;

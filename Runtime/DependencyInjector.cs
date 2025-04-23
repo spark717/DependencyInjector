@@ -2,7 +2,7 @@ namespace Spark
 {
     public class DependencyInjector : IDependencyInjector
     {
-        private readonly NewServiceCollection _collection;
+        private readonly ServiceCollection _collection;
         private readonly ServiceResolver _resolver;
         private readonly CircularDependencyGuard _guard;
         private readonly ServiceInjector _injector;
@@ -11,7 +11,7 @@ namespace Spark
 
         public DependencyInjector()
         {
-            _collection = new NewServiceCollection();
+            _collection = new ServiceCollection();
             _resolver = new ServiceResolver();
             _guard = new CircularDependencyGuard();
             _injector = new ServiceInjector();

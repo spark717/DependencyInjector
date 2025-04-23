@@ -8,7 +8,7 @@ namespace Spark
     {
         public readonly Dictionary<Type, HashSet<Type>> ServiceTypesByBaseType = new();
 
-        public NewServiceCollection ServiceCollection;
+        public ServiceCollection ServiceCollection;
 
         public void RegisterSelf<TServ>()
         {
@@ -70,7 +70,7 @@ namespace Spark
             {
                 var serviceType = serviceTypes.FirstOrDefault(HasActiveController);
                 if (serviceType == null)
-                    throw new Exception();
+                    throw new Exception($"Missing active binding for resolving type {baseType}");
                 
                 var instance = GetOrCreateInstance(serviceType);
                 return instance;

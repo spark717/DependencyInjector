@@ -4,7 +4,7 @@ namespace Spark
 {
     internal class ServiceBindingSetup<TServ> : IServiceBindingSetup<TServ>
     {
-        public ServiceScopeController<TServ> Controller;
+        public ServiceController<TServ> Controller;
         public ServiceResolver ServiceResolver;
         public IDependencyInjector DependencyInjector;
 
