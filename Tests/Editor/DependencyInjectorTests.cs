@@ -554,4 +554,72 @@ public class DependencyInjectorTests
         Assert.True(serv1.Obj == obj1);
         Assert.True(serv2.Obj == obj2);
     }
+
+    [Test]
+    public void ResolveServiceByVariousInterfaces()
+    {
+        var di = new DependencyInjector();
+        var scope = new Scope();
+        var installer = new Installer(binder =>
+        {
+            binder
+                .Bind<Service2>()
+                .As<Service2>()
+                .As<IService>()
+                .As<IService2>();
+        });
+
+        di.Install(installer, scope);
+        
+        scope.IsEnabled = true;
+        
+        var serv1 = di.Resolve<Service2>();
+        var serv2 = di.Resolve<IService>();
+        var serv3 = di.Resolve<IService2>();
+        
+        Assert.True(serv1 == serv2);
+        Assert.True(serv1 == serv3);
+    }
+    
+    [Test]
+    public void ResolveFallback()
+    {
+        var fallbackDi = new DependencyInjector();
+        var fallbackScope = new Scope();
+        var fallbackInstaller = new Installer(binder =>
+        {
+            binder.Bind<Service2>();
+        });
+        fallbackDi.Install(fallbackInstaller, fallbackScope);
+        
+        var di = new DependencyInjector();
+        var scope = new Scope();
+        var installer = new Installer(binder =>
+        {
+            binder.Bind<Service>();
+        });
+        di.Install(installer, scope);
+        di.AddFallback(fallbackDi);
+        
+        scope.IsEnabled = true;
+        fallbackScope.IsEnabled = true;
+        
+        var serv1 = di.Resolve<Service>();
+        var serv2 = di.Resolve<Service2>();
+
+        Assert.True(serv1 != null);
+        Assert.True(serv2 != null);
+        
+        Assert.Catch(() =>
+        {
+            fallbackScope.IsEnabled = false;
+            di.Resolve<Service2>();
+        });
+
+        Assert.Catch(() =>
+        {
+            fallbackScope.IsEnabled = true;
+            fallbackDi.Resolve<Service>();
+        });
+    }
 }

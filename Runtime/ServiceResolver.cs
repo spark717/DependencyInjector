@@ -10,32 +10,21 @@ namespace Spark
 
         public ServiceCollection ServiceCollection;
 
-        public void RegisterSelf<TServ>()
-        {
-            var serviceType = typeof(TServ);
-            var list = ServiceTypesByBaseType.GetOrCreate(serviceType);
-            list.Add(serviceType);
-        }
-        
-        public void UnregisterSelf<TServ>()
-        {
-            var serviceType = typeof(TServ);
-            var list = ServiceTypesByBaseType.GetOrCreate(serviceType);
-            list.Remove(serviceType);
-        }
-
         public void RegisterTypePair<TServ, TBase>()
         {
-            var baseType = typeof(TBase);
             var serviceType = typeof(TServ);
+            var baseType = typeof(TBase);
 
+            RegisterTypePair(serviceType, baseType);
+        }
+        
+        public void RegisterTypePair(Type serviceType, Type baseType)
+        {
             if (baseType.IsAssignableFrom(serviceType) == false)
                 throw new Exception();
             
             var list = ServiceTypesByBaseType.GetOrCreate(baseType);
             list.Add(serviceType);
-
-            UnregisterSelf<TServ>();
         }
         
         public TBase Resolve<TBase>()
@@ -103,6 +92,13 @@ namespace Spark
             }
             
             return array;
+        }
+
+        public bool CanResolve<TBase>()
+        {
+            var serviceTypes = ServiceTypesByBaseType.GetOrCreate(typeof(TBase));
+            var hasAnyActiveController = serviceTypes.Any(HasActiveController);
+            return hasAnyActiveController;
         }
     }
 }

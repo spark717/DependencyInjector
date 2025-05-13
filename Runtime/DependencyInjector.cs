@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Spark
 {
     public class DependencyInjector : IDependencyInjector
@@ -8,6 +12,8 @@ namespace Spark
         private readonly ServiceInjector _injector;
         private readonly ApplicationScope _defaultScope;
         private readonly ProcessorsCollection _processorsCollection;
+        private readonly List<IDependencyInjector> _fallbackList = new();
+        private readonly AutoBindingController _autoBindingController;
 
         public DependencyInjector()
         {
@@ -17,9 +23,11 @@ namespace Spark
             _injector = new ServiceInjector();
             _defaultScope = new ApplicationScope();
             _processorsCollection = new ProcessorsCollection();
+            _autoBindingController = new AutoBindingController();
 
             _resolver.ServiceCollection = _collection;
             _injector.Resolver = _resolver;
+            _autoBindingController.ServiceResolver = _resolver;
             
             Install(new MainInstaller(this));
         }
@@ -38,19 +46,53 @@ namespace Spark
                 ProcessorsCollection = _processorsCollection,
                 Injector = _injector,
                 Guard = _guard,
+                AutoBindingController = _autoBindingController,
             };
 
             installer.Install(binder);
+            
+            _autoBindingController.Execute();
+        }
+
+        public void AddFallback(IDependencyInjector fallbackDi)
+        {
+            _fallbackList.Add(fallbackDi);
         }
         
         public TBase Resolve<TBase>()
         {
-            return _resolver.Resolve<TBase>();
+            try
+            {
+                return _resolver.Resolve<TBase>();
+            }
+            catch (Exception e)
+            {
+                foreach (var fallbackDi in _fallbackList)
+                {
+                    if (fallbackDi.CanResolve<TBase>())
+                    {
+                        return fallbackDi.Resolve<TBase>();
+                    }
+                }
+
+                throw;
+            }
         }
         
         public TBase[] ResolveMany<TBase>()
         {
             return _resolver.ResolveMany<TBase>();
+        }
+
+        public bool CanResolve<TBase>()
+        {
+            var canResolve = _resolver.CanResolve<TBase>();
+            if (canResolve)
+            {
+                return true;
+            }
+            
+            return _fallbackList.Any(x => x.CanResolve<TBase>());
         }
 
         public void Inject(IServiceInjectable target)

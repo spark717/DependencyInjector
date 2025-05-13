@@ -9,11 +9,10 @@ namespace Spark
         public ServiceInjector Injector;
         public ProcessorsCollection ProcessorsCollection;
         public CircularDependencyGuard Guard;
+        public AutoBindingController AutoBindingController;
         
         public IServiceBindingSetup<TServ> Bind<TServ>(bool isSingletone = true)
         {
-            Resolver.RegisterSelf<TServ>();
-            
             var controller = new ServiceController<TServ>()
             {
                 IsSingletone = isSingletone,
@@ -33,7 +32,9 @@ namespace Spark
                 Controller = controller,
                 ServiceResolver = Resolver,
                 DependencyInjector = DependencyInjector,
+                AutoBindingController = AutoBindingController,
             };
+            setup.Init();
             return setup;
         }
     }

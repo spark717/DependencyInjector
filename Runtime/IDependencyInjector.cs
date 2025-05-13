@@ -4,6 +4,7 @@ namespace Spark
     {
         public TBase Resolve<TBase>();
         public TBase[] ResolveMany<TBase>();
+        public bool CanResolve<TBase>();
         public void Inject(IServiceInjectable target);
     }
 }

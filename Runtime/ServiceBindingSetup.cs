@@ -7,10 +7,19 @@ namespace Spark
         public ServiceController<TServ> Controller;
         public ServiceResolver ServiceResolver;
         public IDependencyInjector DependencyInjector;
+        public AutoBindingController AutoBindingController;
 
+        public bool IsAutoSelfBindingCanceled;
+
+        public void Init()
+        {
+            AutoBindingController.Add<TServ>();
+        }
+        
         public IServiceBindingSetup<TServ> As<TBase>()
         {
             ServiceResolver.RegisterTypePair<TServ, TBase>();
+            AutoBindingController.Remove<TServ>();
             return this;
         }
         
