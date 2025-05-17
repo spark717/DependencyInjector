@@ -588,7 +588,7 @@ public class DependencyInjectorTests
         var fallbackScope = new Scope();
         var fallbackInstaller = new Installer(binder =>
         {
-            binder.Bind<Service2>();
+            binder.Bind<ChainServices.ServiceC>();
         });
         fallbackDi.Install(fallbackInstaller, fallbackScope);
         
@@ -596,7 +596,7 @@ public class DependencyInjectorTests
         var scope = new Scope();
         var installer = new Installer(binder =>
         {
-            binder.Bind<Service>();
+            binder.Bind<ChainServices.ServiceD>();
         });
         di.Install(installer, scope);
         di.AddFallback(fallbackDi);
@@ -604,22 +604,24 @@ public class DependencyInjectorTests
         scope.IsEnabled = true;
         fallbackScope.IsEnabled = true;
         
-        var serv1 = di.Resolve<Service>();
-        var serv2 = di.Resolve<Service2>();
+        var serv1 = di.Resolve<ChainServices.ServiceD>();
+        var serv2 = di.Resolve<ChainServices.ServiceC>();
 
         Assert.True(serv1 != null);
         Assert.True(serv2 != null);
         
+        // try resolve disabled fallback service from main di
         Assert.Catch(() =>
         {
             fallbackScope.IsEnabled = false;
-            di.Resolve<Service2>();
+            di.Resolve<ChainServices.ServiceC>();
         });
 
+        // try resolve main service from fallback di
         Assert.Catch(() =>
         {
             fallbackScope.IsEnabled = true;
-            fallbackDi.Resolve<Service>();
+            fallbackDi.Resolve<ChainServices.ServiceD>();
         });
     }
 }

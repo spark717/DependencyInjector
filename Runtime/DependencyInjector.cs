@@ -12,7 +12,6 @@ namespace Spark
         private readonly ServiceInjector _injector;
         private readonly ApplicationScope _defaultScope;
         private readonly ProcessorsCollection _processorsCollection;
-        private readonly List<IDependencyInjector> _fallbackList = new();
         private readonly AutoBindingController _autoBindingController;
 
         public DependencyInjector()
@@ -56,27 +55,12 @@ namespace Spark
 
         public void AddFallback(IDependencyInjector fallbackDi)
         {
-            _fallbackList.Add(fallbackDi);
+            _resolver.AddFallback(((DependencyInjector)fallbackDi)._resolver);
         }
         
         public TBase Resolve<TBase>()
         {
-            try
-            {
-                return _resolver.Resolve<TBase>();
-            }
-            catch (Exception e)
-            {
-                foreach (var fallbackDi in _fallbackList)
-                {
-                    if (fallbackDi.CanResolve<TBase>())
-                    {
-                        return fallbackDi.Resolve<TBase>();
-                    }
-                }
-
-                throw;
-            }
+            return _resolver.Resolve<TBase>();
         }
         
         public TBase[] ResolveMany<TBase>()
@@ -86,13 +70,7 @@ namespace Spark
 
         public bool CanResolve<TBase>()
         {
-            var canResolve = _resolver.CanResolve<TBase>();
-            if (canResolve)
-            {
-                return true;
-            }
-            
-            return _fallbackList.Any(x => x.CanResolve<TBase>());
+            return _resolver.CanResolve<TBase>();
         }
 
         public void Inject(IServiceInjectable target)

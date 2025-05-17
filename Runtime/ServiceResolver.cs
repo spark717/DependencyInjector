@@ -7,9 +7,15 @@ namespace Spark
     internal class ServiceResolver
     {
         public readonly Dictionary<Type, HashSet<Type>> ServiceTypesByBaseType = new();
+        public readonly List<ServiceResolver> FallbackResolvers = new();
 
         public ServiceCollection ServiceCollection;
 
+        public void AddFallback(ServiceResolver fallbackResolver)
+        {
+            FallbackResolvers.Add(fallbackResolver);
+        }
+        
         public void RegisterTypePair<TServ, TBase>()
         {
             var serviceType = typeof(TServ);
@@ -26,6 +32,21 @@ namespace Spark
             var list = ServiceTypesByBaseType.GetOrCreate(baseType);
             list.Add(serviceType);
         }
+
+        public bool CanResolve<TBase>()
+        {
+            return CanResolve(typeof(TBase));
+        }
+        
+        public bool CanResolve(Type type)
+        {
+            var serviceTypes = ServiceTypesByBaseType.GetOrCreate(type);
+            var hasAnyActiveController = serviceTypes.Any(HasActiveController);
+            if (hasAnyActiveController)
+                return true;
+
+            return FallbackResolvers.Any(x => x.CanResolve(type));
+        }
         
         public TBase Resolve<TBase>()
         {
@@ -41,8 +62,28 @@ namespace Spark
         {
             return types.Select(Resolve).ToArray();
         }
-        
+
         public object Resolve(Type type)
+        {
+            try
+            {
+                return ResolveInternal(type);
+            }
+            catch (Exception e)
+            {
+                foreach (var fallbackResolver in FallbackResolvers)
+                {
+                    if (fallbackResolver.CanResolve(type))
+                    {
+                        return fallbackResolver.Resolve(type);
+                    }
+                }
+                
+                throw;
+            }
+        }
+        
+        private object ResolveInternal(Type type)
         {
             var isArray = type.IsArray;
             var baseType = isArray ? type.GetElementType() : type;
@@ -92,13 +133,6 @@ namespace Spark
             }
             
             return array;
-        }
-
-        public bool CanResolve<TBase>()
-        {
-            var serviceTypes = ServiceTypesByBaseType.GetOrCreate(typeof(TBase));
-            var hasAnyActiveController = serviceTypes.Any(HasActiveController);
-            return hasAnyActiveController;
         }
     }
 }
