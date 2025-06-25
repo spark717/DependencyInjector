@@ -4,17 +4,12 @@ using System.Linq;
 
 namespace Spark
 {
-    internal class ServiceResolver
+    internal class ServiceResolver : IServiceResolver
     {
         public readonly Dictionary<Type, HashSet<Type>> ServiceTypesByBaseType = new();
-        public readonly List<ServiceResolver> FallbackResolvers = new();
-
+        
+        public FallbackServiceResolver Fallback;
         public ServiceCollection ServiceCollection;
-
-        public void AddFallback(ServiceResolver fallbackResolver)
-        {
-            FallbackResolvers.Add(fallbackResolver);
-        }
         
         public void RegisterTypePair<TServ, TBase>()
         {
@@ -45,7 +40,7 @@ namespace Spark
             if (hasAnyActiveController)
                 return true;
 
-            return FallbackResolvers.Any(x => x.CanResolve(type));
+            return Fallback.CanResolve(type);
         }
         
         public TBase Resolve<TBase>()
@@ -71,15 +66,11 @@ namespace Spark
             }
             catch (Exception e)
             {
-                foreach (var fallbackResolver in FallbackResolvers)
-                {
-                    if (fallbackResolver.CanResolve(type))
-                    {
-                        return fallbackResolver.Resolve(type);
-                    }
-                }
-                
-                throw;
+                var result = Fallback.Resolve(type);
+                if (result != null)
+                    return result;
+                else
+                    throw;
             }
         }
         

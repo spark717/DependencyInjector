@@ -5,6 +5,7 @@ namespace Spark
         public IServiceScope Scope;
         public ServiceCollection ServiceCollection;
         public ServiceResolver Resolver;
+        public FallbackServiceResolver FallbackServiceResolver;
         public DependencyInjector DependencyInjector;
         public ServiceInjector Injector;
         public ProcessorsCollection ProcessorsCollection;
@@ -33,6 +34,7 @@ namespace Spark
                 ServiceResolver = Resolver,
                 DependencyInjector = DependencyInjector,
                 AutoBindingController = AutoBindingController,
+                FallbackServiceResolver = FallbackServiceResolver,
             };
             setup.Init();
             return setup;

@@ -597,9 +597,12 @@ public class DependencyInjectorTests
         var installer = new Installer(binder =>
         {
             binder.Bind<ChainServices.ServiceD>();
+            binder
+                .Bind<IServiceResolver>()
+                .WithInstance(fallbackDi.GetResolver())
+                .AsFallbackResolver();
         });
         di.Install(installer, scope);
-        di.AddFallback(fallbackDi);
         
         scope.IsEnabled = true;
         fallbackScope.IsEnabled = true;

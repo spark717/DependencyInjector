@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Spark
 {
     public class DependencyInjector : IDependencyInjector
     {
         private readonly ServiceCollection _collection;
         private readonly ServiceResolver _resolver;
+        private readonly FallbackServiceResolver _fallbackServiceResolver;
         private readonly CircularDependencyGuard _guard;
         private readonly ServiceInjector _injector;
         private readonly ApplicationScope _defaultScope;
@@ -18,6 +15,7 @@ namespace Spark
         {
             _collection = new ServiceCollection();
             _resolver = new ServiceResolver();
+            _fallbackServiceResolver = new();
             _guard = new CircularDependencyGuard();
             _injector = new ServiceInjector();
             _defaultScope = new ApplicationScope();
@@ -25,6 +23,7 @@ namespace Spark
             _autoBindingController = new AutoBindingController();
 
             _resolver.ServiceCollection = _collection;
+            _resolver.Fallback = _fallbackServiceResolver;
             _injector.Resolver = _resolver;
             _autoBindingController.ServiceResolver = _resolver;
             
@@ -41,6 +40,7 @@ namespace Spark
                 Scope = scope,
                 ServiceCollection = _collection,
                 Resolver = _resolver,
+                FallbackServiceResolver = _fallbackServiceResolver,
                 DependencyInjector = this,
                 ProcessorsCollection = _processorsCollection,
                 Injector = _injector,
@@ -51,11 +51,6 @@ namespace Spark
             installer.Install(binder);
             
             _autoBindingController.Execute();
-        }
-
-        public void AddFallback(IDependencyInjector fallbackDi)
-        {
-            _resolver.AddFallback(((DependencyInjector)fallbackDi)._resolver);
         }
         
         public TBase Resolve<TBase>()
@@ -100,6 +95,11 @@ namespace Spark
             {
                 controller.DestroySingletone();
             }
+        }
+
+        public IServiceResolver GetResolver()
+        {
+            return _resolver;
         }
     }
 }

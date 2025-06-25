@@ -8,6 +8,7 @@ namespace Spark
         public ServiceResolver ServiceResolver;
         public IDependencyInjector DependencyInjector;
         public AutoBindingController AutoBindingController;
+        public FallbackServiceResolver FallbackServiceResolver;
 
         public bool IsAutoSelfBindingCanceled;
 
@@ -25,8 +26,15 @@ namespace Spark
         
         public IServiceBindingSetup<TServ> AsProcessor()
         {
-            ServiceResolver.RegisterTypePair<TServ, IServiceProcessor>();
+            As<IServiceProcessor>();
             Controller.IsProcessor = true;
+            return this;
+        }
+
+        public IServiceBindingSetup<TServ> AsFallbackResolver()
+        {
+            As<IServiceResolver>();
+            FallbackServiceResolver.AddController(Controller);
             return this;
         }
 
