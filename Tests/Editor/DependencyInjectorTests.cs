@@ -598,8 +598,8 @@ public class DependencyInjectorTests
         {
             binder.Bind<ChainServices.ServiceD>();
             binder
-                .Bind<IServiceResolver>()
-                .WithInstance(fallbackDi.GetResolver())
+                .Bind<DependencyInjector>()
+                .WithInstance(fallbackDi)
                 .AsFallbackResolver();
         });
         di.Install(installer, scope);

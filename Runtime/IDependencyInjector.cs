@@ -1,6 +1,6 @@
 namespace Spark
 {
-    public interface IDependencyInjector
+    public interface IDependencyInjector : IServiceResolver
     {
         public TBase Resolve<TBase>();
         public TBase[] ResolveMany<TBase>();

@@ -1,3 +1,5 @@
+using System;
+
 namespace Spark
 {
     public class DependencyInjector : IDependencyInjector
@@ -67,6 +69,16 @@ namespace Spark
         {
             return _resolver.CanResolve<TBase>();
         }
+        
+        public object Resolve(Type type)
+        {
+            return _resolver.Resolve(type);
+        }
+
+        public bool CanResolve(Type type)
+        {
+            return _resolver.CanResolve(type);
+        }
 
         public void Inject(IServiceInjectable target)
         {
@@ -95,11 +107,6 @@ namespace Spark
             {
                 controller.DestroySingletone();
             }
-        }
-
-        public IServiceResolver GetResolver()
-        {
-            return _resolver;
         }
     }
 }

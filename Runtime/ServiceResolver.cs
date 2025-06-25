@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Spark
 {
-    internal class ServiceResolver : IServiceResolver
+    internal class ServiceResolver
     {
         public readonly Dictionary<Type, HashSet<Type>> ServiceTypesByBaseType = new();
         
