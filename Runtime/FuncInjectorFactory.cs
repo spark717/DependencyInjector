@@ -2,12 +2,12 @@ using System;
 
 namespace Spark
 {
-    internal class FuncInjectorFactory<TServ> : IFactory<TServ>
+    internal class FuncInjectorFactory : IFactory
     {
-        public Func<IDependencyInjector, TServ> Func;
+        public Func<IDependencyInjector, object> Func;
         public IDependencyInjector DependencyInjector;
         
-        public TServ Create()
+        public object Create()
         {
             return Func(DependencyInjector);
         }

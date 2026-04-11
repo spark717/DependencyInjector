@@ -1,10 +1,10 @@
 namespace Spark
 {
-    internal class InstanceFactory<TServ> : IFactory<TServ>
+    internal class InstanceFactory : IFactory
     {
-        public TServ Instance;
+        public object Instance;
         
-        public TServ Create()
+        public object Create()
         {
             return Instance;
         }

@@ -8,9 +8,9 @@ namespace Spark
     {
         public readonly Dictionary<Type, List<IServiceController>> ControllersByType = new();
 
-        public void Add<TServ>(ServiceController<TServ> controller)
+        public void Add(ServiceController controller)
         {
-            var list = ControllersByType.GetOrCreate(typeof(TServ));
+            var list = ControllersByType.GetOrCreate(controller.ServiceType);
             list.Add(controller);
         }
 

@@ -4,26 +4,27 @@ using System.Reflection;
 
 namespace Spark
 {
-    internal class ReflectionFactory<TServ> : IFactory<TServ>
+    internal class ReflectionFactory : IFactory
     {
         public ServiceResolver Resolver;
+        public Type ServiceType;
         
-        public TServ Create()
+        public object Create()
         {
-            var constructor = typeof(TServ).GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
+            var constructor = ServiceType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
             if (constructor != null)
             {
                 var argsTypes = constructor.GetParameters().Select(x => x.ParameterType);
                 var args = Resolver.Resolve(argsTypes);
                 var instance = constructor.Invoke(args);
-                return (TServ)instance;
+                return instance;
             }
             else
             {
-                if (typeof(TServ).IsAbstract)
-                    throw new Exception($"Cant create instance of abstract type <{typeof(TServ).Name}>");
+                if (ServiceType.IsAbstract)
+                    throw new Exception($"Cant create instance of abstract type <{ServiceType.Name}>");
                 
-                var instance = Activator.CreateInstance<TServ>();
+                var instance = Activator.CreateInstance(ServiceType);
                 return instance;
             }
         }

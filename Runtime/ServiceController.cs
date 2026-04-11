@@ -2,16 +2,17 @@ using System;
 
 namespace Spark
 {
-    internal class ServiceController<TServ> : IServiceController
+    internal class ServiceController : IServiceController
     {
         public bool IsSingletone;
         public bool IsProcessor;
         public IServiceScope Scope;
-        public TServ Instance;
-        public IFactory<TServ> Factory;
+        public object Instance;
+        public IFactory Factory;
         public ServiceInjector Injector;
         public ProcessorsCollection ProcessorsCollection;
         public CircularDependencyGuard Guard;
+        public Type ServiceType;
 
         public object GetOrCreateInstance()
         {
@@ -47,9 +48,9 @@ namespace Spark
             ProcessorsCollection.OnServiceCreated(Instance);
         }
 
-        private TServ CreateService()
+        private object CreateService()
         {
-            Guard.Append(typeof(TServ));
+            Guard.Append(ServiceType);
             
             var service = Factory.Create();
             

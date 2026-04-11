@@ -9,14 +9,14 @@ namespace Spark
         
         public readonly HashSet<Type> Services = new();
 
-        public void Add<TServ>()
+        public void Add(Type serviceType)
         {
-            Services.Add(typeof(TServ));
+            Services.Add(serviceType);
         }
 
-        public void Remove<TServ>()
+        public void Remove(Type serviceType)
         {
-            Services.Add(typeof(TServ));
+            Services.Add(serviceType);
         }
 
         public void Execute()

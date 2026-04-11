@@ -2,11 +2,11 @@ using System;
 
 namespace Spark
 {
-    internal class FuncFactory<TServ> : IFactory<TServ>
+    internal class FuncFactory : IFactory
     {
-        public Func<TServ> Func;
+        public Func<object> Func;
         
-        public TServ Create()
+        public object Create()
         {
             return Func();
         }

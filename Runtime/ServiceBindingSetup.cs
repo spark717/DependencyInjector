@@ -2,54 +2,60 @@ using System;
 
 namespace Spark
 {
-    internal class ServiceBindingSetup<TServ> : IServiceBindingSetup<TServ>
+    internal class ServiceBindingSetup : IServiceBindingSetup
     {
-        public ServiceController<TServ> Controller;
+        public ServiceController Controller;
         public ServiceResolver ServiceResolver;
         public IDependencyInjector DependencyInjector;
         public AutoBindingController AutoBindingController;
         public FallbackServiceResolver FallbackServiceResolver;
 
         public bool IsAutoSelfBindingCanceled;
+        public Type ServiceType;
 
         public void Init()
         {
-            AutoBindingController.Add<TServ>();
+            AutoBindingController.Add(ServiceType);
         }
         
-        public IServiceBindingSetup<TServ> As<TBase>()
+        public IServiceBindingSetup As<TBase>()
         {
-            ServiceResolver.RegisterTypePair<TServ, TBase>();
-            AutoBindingController.Remove<TServ>();
+            return As(typeof(TBase));
+        }
+        
+        public IServiceBindingSetup As(Type type)
+        {
+            ServiceResolver.RegisterTypePair(serviceType: ServiceType, baseType: type);
+            AutoBindingController.Remove(ServiceType);
             return this;
         }
         
-        public IServiceBindingSetup<TServ> AsProcessor()
+        public IServiceBindingSetup AsProcessor()
         {
             As<IServiceProcessor>();
             Controller.IsProcessor = true;
             return this;
         }
 
-        public IServiceBindingSetup<TServ> AsFallbackResolver()
+        public IServiceBindingSetup AsFallbackResolver()
         {
             As<IServiceResolver>();
             FallbackServiceResolver.AddController(Controller);
             return this;
         }
 
-        public IServiceBindingSetup<TServ> WithFactory(Func<TServ> factory)
+        public IServiceBindingSetup WithFactory(Func<object> factory)
         {
-            Controller.Factory = new FuncFactory<TServ>()
+            Controller.Factory = new FuncFactory()
             {
                 Func = factory
             };
             return this;
         }
 
-        public IServiceBindingSetup<TServ> WithFactory(Func<IDependencyInjector, TServ> factory)
+        public IServiceBindingSetup WithFactory(Func<IDependencyInjector, object> factory)
         {
-            Controller.Factory = new FuncInjectorFactory<TServ>()
+            Controller.Factory = new FuncInjectorFactory()
             {
                 Func = factory,
                 DependencyInjector = DependencyInjector,
@@ -57,9 +63,15 @@ namespace Spark
             return this;
         }
 
-        public IServiceBindingSetup<TServ> WithInstance(TServ instance)
+        public IServiceBindingSetup WithInstance(object instance)
         {
-            Controller.Factory = new InstanceFactory<TServ>()
+            if (instance.GetType() != ServiceType)
+            {
+                // TODO
+                throw new Exception();
+            }
+            
+            Controller.Factory = new InstanceFactory()
             {
                 Instance = instance
             };

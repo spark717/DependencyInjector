@@ -1,3 +1,5 @@
+using System;
+
 namespace Spark
 {
     internal class ServiceBinder : IServiceBinder
@@ -12,29 +14,37 @@ namespace Spark
         public CircularDependencyGuard Guard;
         public AutoBindingController AutoBindingController;
         
-        public IServiceBindingSetup<TServ> Bind<TServ>(bool isSingletone = true)
+        public IServiceBindingSetup Bind<TServ>(bool isSingletone = true)
         {
-            var controller = new ServiceController<TServ>()
+            return Bind(typeof(TServ), isSingletone);
+        }
+
+        public IServiceBindingSetup Bind(Type serviceType, bool isSingletone = true)
+        {
+            var controller = new ServiceController()
             {
                 IsSingletone = isSingletone,
                 Scope = Scope,
                 Injector = Injector,
                 ProcessorsCollection = ProcessorsCollection,
                 Guard = Guard,
-                Factory = new ReflectionFactory<TServ>()
+                ServiceType = serviceType,
+                Factory = new ReflectionFactory()
                 {
-                    Resolver = Resolver
+                    Resolver = Resolver,
+                    ServiceType = serviceType,
                 }
             };
             ServiceCollection.Add(controller);
             
-            var setup = new ServiceBindingSetup<TServ>
+            var setup = new ServiceBindingSetup
             {
                 Controller = controller,
                 ServiceResolver = Resolver,
                 DependencyInjector = DependencyInjector,
                 AutoBindingController = AutoBindingController,
                 FallbackServiceResolver = FallbackServiceResolver,
+                ServiceType = serviceType,
             };
             setup.Init();
             return setup;

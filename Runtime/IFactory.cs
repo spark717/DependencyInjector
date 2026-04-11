@@ -1,7 +1,7 @@
 namespace Spark
 {
-    internal interface IFactory<TServ>
+    internal interface IFactory
     {
-        public TServ Create();
+        public object Create();
     }
 }

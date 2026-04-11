@@ -11,14 +11,6 @@ namespace Spark
         public FallbackServiceResolver Fallback;
         public ServiceCollection ServiceCollection;
         
-        public void RegisterTypePair<TServ, TBase>()
-        {
-            var serviceType = typeof(TServ);
-            var baseType = typeof(TBase);
-
-            RegisterTypePair(serviceType, baseType);
-        }
-        
         public void RegisterTypePair(Type serviceType, Type baseType)
         {
             if (baseType.IsAssignableFrom(serviceType) == false)
