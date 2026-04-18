@@ -18,11 +18,6 @@ namespace Spark
             AutoBindingController.Add(ServiceType);
         }
         
-        public IServiceBindingSetup As<TBase>()
-        {
-            return As(typeof(TBase));
-        }
-        
         public IServiceBindingSetup As(Type type)
         {
             ServiceResolver.RegisterTypePair(serviceType: ServiceType, baseType: type);
@@ -32,14 +27,14 @@ namespace Spark
         
         public IServiceBindingSetup AsProcessor()
         {
-            As<IServiceProcessor>();
+            As(typeof(IServiceProcessor));
             Controller.IsProcessor = true;
             return this;
         }
 
         public IServiceBindingSetup AsFallbackResolver()
         {
-            As<IServiceResolver>();
+            As(typeof(IServiceResolver));
             FallbackServiceResolver.AddController(Controller);
             return this;
         }
@@ -67,8 +62,7 @@ namespace Spark
         {
             if (instance.GetType() != ServiceType)
             {
-                // TODO
-                throw new Exception();
+                throw new Exception($"Instance type {instance.GetType()} is not the same as registered type {ServiceType}");
             }
             
             Controller.Factory = new InstanceFactory()

@@ -14,7 +14,7 @@ namespace Spark
         public void RegisterTypePair(Type serviceType, Type baseType)
         {
             if (baseType.IsAssignableFrom(serviceType) == false)
-                throw new Exception();
+                throw new Exception($"Type {serviceType} is not derived from type {baseType}");
             
             var list = ServiceTypesByBaseType.GetOrCreate(baseType);
             list.Add(serviceType);

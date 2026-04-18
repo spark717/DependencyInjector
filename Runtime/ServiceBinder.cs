@@ -14,12 +14,44 @@ namespace Spark
         public CircularDependencyGuard Guard;
         public AutoBindingController AutoBindingController;
         
-        public IServiceBindingSetup Bind<TServ>(bool isSingletone = true)
+        public IServiceBindingSetup<TServ> Bind<TServ>(bool isSingletone = true)
         {
-            return Bind(typeof(TServ), isSingletone);
+            var serviceType = typeof(TServ);
+            var controller = CreateController(serviceType, isSingletone);
+            ServiceCollection.Add(controller);
+            
+            var setup = new ServiceBindingSetup<TServ>
+            {
+                Controller = controller,
+                ServiceResolver = Resolver,
+                DependencyInjector = DependencyInjector,
+                AutoBindingController = AutoBindingController,
+                FallbackServiceResolver = FallbackServiceResolver,
+                ServiceType = serviceType,
+            };
+            setup.Init();
+            return setup;
         }
 
         public IServiceBindingSetup Bind(Type serviceType, bool isSingletone = true)
+        {
+            var controller = CreateController(serviceType, isSingletone);
+            ServiceCollection.Add(controller);
+            
+            var setup = new ServiceBindingSetup
+            {
+                Controller = controller,
+                ServiceResolver = Resolver,
+                DependencyInjector = DependencyInjector,
+                AutoBindingController = AutoBindingController,
+                FallbackServiceResolver = FallbackServiceResolver,
+                ServiceType = serviceType,
+            };
+            setup.Init();
+            return setup;
+        }
+
+        private ServiceController CreateController(Type serviceType, bool isSingletone)
         {
             var controller = new ServiceController()
             {
@@ -35,19 +67,7 @@ namespace Spark
                     ServiceType = serviceType,
                 }
             };
-            ServiceCollection.Add(controller);
-            
-            var setup = new ServiceBindingSetup
-            {
-                Controller = controller,
-                ServiceResolver = Resolver,
-                DependencyInjector = DependencyInjector,
-                AutoBindingController = AutoBindingController,
-                FallbackServiceResolver = FallbackServiceResolver,
-                ServiceType = serviceType,
-            };
-            setup.Init();
-            return setup;
+            return controller;
         }
     }
 }
