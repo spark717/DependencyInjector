@@ -77,5 +77,10 @@ namespace Spark
             };
             return this;
         }
+
+        public Type GetServiceType()
+        {
+            return ServiceType;
+        }
     }
 }

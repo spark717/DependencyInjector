@@ -11,5 +11,6 @@ namespace Spark
         public IServiceBindingSetup WithFactory(Func<object> factory);
         public IServiceBindingSetup WithFactory(Func<IDependencyInjector, object> factory);
         public IServiceBindingSetup WithInstance(object instance);
+        public Type GetServiceType();
     }
 }
