@@ -10,7 +10,7 @@ namespace Spark
         
         public void Inject(IServiceInjectable target)
         {
-            var method = GetMethod(target);
+            var method = GetInjectMethod(target);
             if (method == null)
                 throw new Exception($"Inject method is missing in {target.GetType().Name}");
 
@@ -19,9 +19,29 @@ namespace Spark
             method.Invoke(target, args);
         }
 
-        private MethodInfo GetMethod(object target)
+        private MethodInfo GetInjectMethod(object target)
         {
-            return target.GetType().GetMethod("Inject", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            return GetInjectMethod(target.GetType());
+        }
+
+        private MethodInfo GetInjectMethod(Type type)
+        {
+            var currentType = type;
+            while (currentType != null)
+            {
+                var method = currentType.GetMethod("Inject", 
+                    BindingFlags.Instance | 
+                    BindingFlags.Public | 
+                    BindingFlags.NonPublic | 
+                    BindingFlags.DeclaredOnly);
+
+                if (method != null)
+                    return method;
+
+                currentType = currentType.BaseType;
+            }
+
+            return null;
         }
     }
 }

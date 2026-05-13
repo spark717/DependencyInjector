@@ -482,17 +482,21 @@ public class DependencyInjectorTests
             binder.Bind<InjectableServices.ServiceB>();
             binder.Bind<InjectableServices.ServiceC>();
             binder.Bind<InjectableServices.ServiceD>();
+            binder.Bind<InjectableServices.ServiceE>();
         });
         di.Install(installer);
 
         var a = new InjectableServices.ServiceA();
+        var e = new InjectableServices.ServiceE();
         di.Inject(a);
+        di.Inject(e);
         
         Assert.True(a.B != null);
         Assert.True(a.B.C != null);
         Assert.True(a.B.D != null);
         Assert.True(a.B.C.D != null);
         Assert.True(a.B.C.D == a.B.D);
+        Assert.True(e.D == a.B.D);
     }
     
     [Test]

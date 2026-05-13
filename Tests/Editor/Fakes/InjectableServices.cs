@@ -14,15 +14,15 @@ namespace Tests.Editor.Fakes
             }
         }
         
-        public class ServiceB : IServiceInjectable
+        public class ServiceB : ServiceBase
         {
-            public ServiceD D;
             public ServiceC C;
             
             public void Inject(ServiceD d, ServiceC c)
             {
-                D = d;
                 C = c;
+                
+                base.Inject(d);
             }
         }
         
@@ -39,6 +39,21 @@ namespace Tests.Editor.Fakes
         public class ServiceD
         {
             
+        }
+        
+        public class ServiceE : ServiceBase
+        {
+            
+        }
+        
+        public class ServiceBase : IServiceInjectable
+        {
+            public ServiceD D;
+            
+            public void Inject(ServiceD d)
+            {
+                D = d;
+            }
         }
     }
 }
